@@ -1,0 +1,20 @@
+<conexiones>
+
+    <nodo>
+        <motor>Firebird</motor>
+        <database>test_fdb</database>
+        <ip>192.168.0.139</ip>
+        <ubicacionDB>/var/lib/firebird/3.0/data/test.fdb</ubicacionDB>
+        <usuario>sysdba</usuario>
+        <password>Masterkey</password>
+    </nodo>
+
+     <nodo>
+        <motor>Postgresql</motor>
+        <database>prueba</database>
+        <ip>192.168.0.19</ip>
+        <usuario>sysdba</usuario>
+        <password>Masterkey</password>
+    </nodo>
+
+</conexiones>
