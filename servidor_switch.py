@@ -2,7 +2,6 @@ import socket
 import xml.etree.ElementTree as ET
 import os
 import fdb
-import fdb.fbcore
 import psycopg2
 import struct
 
@@ -85,9 +84,14 @@ def ejecutar_query_firebird(sCliente:socket.socket, query:str, nodo: dict):
     try:
         cursor = conexion.cursor()
         cursor.execute(query)
-        filas = cursor.fetchall()
-        columnas = [desc[0] for desc in cursor.description]
-
+        try: 
+            filas = cursor.fetchall()
+            columnas = [desc[0] for desc in cursor.description]
+        except:
+            conexion.commit()
+            filas = ()
+            columnas = ()
+            
         cursor.close()
         conexion.close()
     except Exception as e:
@@ -118,12 +122,19 @@ def ejecutar_query_postgresql(sCliente:socket.socket, query:str, nodo: dict, nom
     try:
         cursor = conexion.cursor()
         cursor.execute(query)
-        filas = cursor.fetchall()
-        columnas = [desc[0] for desc in cursor.description]
+        try: 
+            filas = cursor.fetchall()
+            columnas = [desc[0] for desc in cursor.description]
+        except:
+            conexion.commit()
+            filas = ()
+            columnas = ()
+        
 
         cursor.close()
         conexion.close()
     except Exception as e:
+        print(e);
         enviar_mensaje_error(sCliente, "Hubo un error al ejecutar la consulta, verifique la sintaxis y ejecute nuevamente")
         cursor.close()
         conexion.close()
@@ -225,16 +236,17 @@ def main():
         socket_servidor.listen()
         print(f"Servidor escuchando en {HOST}:{PUERTO}")
         
-        sock_cliente, address = socket_servidor.accept()
-        while (1):
-            peticion = recibir_mensaje(sock_cliente, address)
-            if peticion == None:
-                print(f"Cliente {address[0]}:{address[1]} desconectado")
-                break;
-            mensaje = generar_respuesta(peticion, sock_cliente)
-            if mensaje != "":
-                print("respuesta", mensaje)
-                enviar_mensaje(sock_cliente, mensaje)
+        while(1):
+            sock_cliente, address = socket_servidor.accept()
+            while (1):
+                peticion = recibir_mensaje(sock_cliente, address)
+                if peticion == None:
+                    print(f"Cliente {address[0]}:{address[1]} desconectado")
+                    break;
+                mensaje = generar_respuesta(peticion, sock_cliente)
+                if mensaje != "":
+                    print("respuesta", mensaje)
+                    enviar_mensaje(sock_cliente, mensaje)
 
 
         
